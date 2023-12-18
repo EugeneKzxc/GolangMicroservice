@@ -1,0 +1,96 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: pg_container
+    environment:
+      POSTGRES_DB: L0_database
+      POSTGRES_USER: L0_user
+      POSTGRES_PASSWORD: zxc
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U L0_user -d L0_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats-streaming:
+    image: nats-streaming:latest
+    container_name: nats_container
+    ports:
+      - "4222:4222"
+    networks:
+      - app-network
+
+  go-server:
+    build:
+      context: .
+      dockerfile: sub/DockerfileSub
+    container_name: go_sub_container
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats-streaming:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    networks:
+      - app-network
+
+  go-pub:
+    build:
+      context: .
+      dockerfile: pub/DockerfilePub
+    container_name: go_pub_container
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats-streaming:
+        condition: service_started
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    networks:
+      - app-network
+    command: -config.file=/etc/loki/local-config.yaml
+    
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./docker-config.yaml:/etc/promtail/docker-config.yaml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    networks:
+      - app-network
+    command: -config.file=/etc/promtail/docker-config.yaml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    environment:
+      - GF_EXPLORE_ENABLED=true
+
+networks:
+  app-network:
+    driver: bridge

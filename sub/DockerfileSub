@@ -1,0 +1,14 @@
+FROM golang:latest AS builder
+
+WORKDIR /app
+
+COPY sub/go.mod sub/go.sum ./
+RUN go mod download
+
+COPY sub/ ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o sub-server .
+
+FROM alpine
+COPY --from=builder /app/sub-server /sub-server
+ENTRYPOINT ["/sub-server"]

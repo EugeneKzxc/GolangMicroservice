@@ -1,0 +1,62 @@
+{
+		"order_uid": "16384",
+		"track_number": "TRACK12345",
+		"entry": "entry",
+		"delivery": {
+			"name": "John Doe",
+			"phone": "1234567890",
+			"zip": "123456",
+			"city": "City",
+			"address": "Street 123",
+			"region": "Region",
+			"email": "john.doe@example.com"
+		},
+		"payment": {
+			"transaction": "TRANSACTION12345",
+			"request_id": "",
+			"currency": "USD",
+			"provider": "provider",
+			"amount": 100,
+			"payment_dt": 1609459200,
+			"bank": "bank",
+			"delivery_cost": 20,
+			"goods_total": 100,
+			"custom_fee": 0
+		},
+		"items": [
+			{
+				"chrt_id": 1,
+				"track_number": "ITEMTRACK12345",
+				"price": 100,
+				"rid": "RID12345",
+				"name": "Item Name",
+				"sale": 5,
+				"size": "M",
+				"total_price": 95,
+				"nm_id": 123,
+				"brand": "Brand Name",
+				"status": 1
+			},
+			{
+				"chrt_id": 2,
+				"track_number": "ITEMTRACK12345",
+				"price": 100,
+				"rid": "RID12345",
+				"name": "Item Name",
+				"sale": 5,
+				"size": "M",
+				"total_price": 95,
+				"nm_id": 123,
+				"brand": "Brand Name",
+				"status": 1
+			}
+		],
+		"locale": "en",
+		"internal_signature": "",
+		"customer_id": "CUSTOMER12345",
+		"delivery_service": "DHL",
+		"shardkey": "shardkey",
+		"sm_id": 1,
+		"date_created": "2021-01-01T12:00:00Z",
+		"oof_shard": "oof_shard"
+	}
