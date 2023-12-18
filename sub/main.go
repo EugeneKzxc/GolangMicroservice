@@ -6,6 +6,27 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+func recordMetrics() {
+	go func() {
+		for {
+			opsProcessed.Inc()
+			time.Sleep(2 * time.Second)
+		}
+	}()
+}
+
+var (
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "myapp_processed_ops_total",
+		Help: "The total number of processed events",
+	})
 )
 
 func main() {
@@ -69,8 +90,11 @@ func main() {
 		tmpl.Execute(w, order)
 	})
 
-	log.Println("Server started at http://localhost:8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	recordMetrics()
+	http.Handle("/metrics", promhttp.Handler())
+
+	log.Println("Server started at http://localhost:8000")
+	if err := http.ListenAndServe(":8000", nil); err != nil {
 		log.Fatal("Error ListenAndServe: ", err)
 	}
 }
