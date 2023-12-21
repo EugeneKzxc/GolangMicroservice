@@ -1,6 +1,41 @@
 version: '3'
 
 services:
+  keycloak-db:
+    image: postgres:latest
+    container_name: keycloak_db_container
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak_password
+    volumes:
+      - keycloak_db:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  keycloak:
+    image: jboss/keycloak:latest
+    container_name: keycloak_container
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/keycloak-config.json
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak_password
+    ports:
+      - "9080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - keycloak-db
+    volumes:
+      - ./keycloak-config.json:/tmp/keycloak-config.json
+    command:
+      - "-b 0.0.0.0"
+
   postgres:
     image: postgres:latest
     container_name: pg_container
@@ -114,6 +149,7 @@ services:
       - app-network
 
 volumes:
+  keycloak_db:
   prometheus:
     name: prometheus
 
